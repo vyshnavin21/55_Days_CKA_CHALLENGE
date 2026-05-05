@@ -1,0 +1,85 @@
+# 🐳 Docker — Quick Revision Cheat Sheet
+
+---
+
+## What is Docker?
+Package your app + dependencies + runtime into a **Container** that runs anywhere.
+> Build → Ship → Run
+
+---
+
+## VM vs Container (Quick)
+
+| | Virtual Machine | Container |
+|---|---|---|
+| OS | Full Guest OS per VM | Shares Host OS kernel |
+| Size | GBs | MBs |
+| Startup | Minutes | Seconds |
+| Isolation | Hardware-level | Process-level |
+| Resource | Heavy | Lightweight |
+
+---
+
+## Stack (Bottom → Top)
+
+| VM Stack | Container Stack |
+|---|---|
+| Hardware | Physical Server |
+| Host OS | Host OS |
+| Hypervisor | Container Engine (Docker) |
+| Guest OS | ~~No Guest OS~~ ✅ |
+| Libraries/Binaries | Libraries/Binaries |
+| App | App |
+
+---
+
+## Docker Flow
+
+```
+Dockerfile → build → Image → push → Registry
+                                        ↓ pull
+                               Dev / Test / Prod
+                                     ↓ run
+                                  Container
+```
+
+---
+
+## Architecture (3 components)
+
+| Component | Role |
+|---|---|
+| **Docker Client** | Where you type commands |
+| **Docker Daemon (dockerd)** | Does the actual work |
+| **Registry** | Stores images (Docker Hub, Quay.io, JFrog) |
+
+### Command internals (one line each)
+- `docker build` → Client → Daemon → reads Dockerfile → creates Image locally
+- `docker push` → Client → Daemon → uploads Image to Registry
+- `docker pull` → Client → Daemon → downloads Image from Registry
+- `docker run` → Client → Daemon → Container Runtime → Container starts
+
+---
+
+## Why Containers over VMs?
+- No Guest OS overhead = faster + lighter
+- Starts in seconds not minutes
+- Same image runs on Dev/Test/Prod — no environment mismatch
+- Run many containers where only few VMs would fit
+
+---
+
+## Key Terms
+
+| Term | One line |
+|---|---|
+| Dockerfile | Recipe to build an image |
+| Image | Read-only blueprint (built from Dockerfile) |
+| Container | Running instance of an image |
+| Registry | Remote storage for images |
+| Docker Daemon | Background engine that manages everything |
+| Container Runtime | Actually starts/stops containers (e.g. containerd) |
+
+---
+
+*For detailed notes → see `Day01 notes.md`*
