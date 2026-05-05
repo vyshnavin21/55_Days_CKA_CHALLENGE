@@ -161,10 +161,105 @@ Spinning up a new VM to handle traffic spikes takes minutes. By the time it's re
 ```
 Dockerfile → (docker build) → Image → (docker run) → Container
 ```
+---
+
+## 5. Simple Docker Flow
+
+Once you understand what Docker is, the next question is — **how does code actually become a running container?**
+
+Here's the complete flow:
+
+```
+Dockerfile → (docker build) → Docker Image → (docker push) → Registry
+                                                                  ↓
+                                                            (docker pull)
+                                                                  ↓
+                                                    Dev / Test / Prod Environments
+                                                         (docker run → Container)
+```
+
+### Step-by-step breakdown
+
+| Step | Command | What happens |
+|---|---|---|
+| **1. Write** | — | You write a `Dockerfile` describing your app environment |
+| **2. Build** | `docker build` | Docker reads the Dockerfile and creates an **Image** locally |
+| **3. Push** | `docker push` | You upload the image to a **Registry** (Docker Hub, JFrog, Nexus, Quay.io) |
+| **4. Pull** | `docker pull` | Any environment (Dev/Test/Prod) pulls the image from the Registry |
+| **5. Run** | `docker run` | The pulled image is started as a running **Container** |
+
+### My Insight 💡
+> The Registry is the **single source of truth** for your images. Think of it like GitHub for code — you push your image once and any environment in the world can pull and run the exact same thing. This is what eliminates the classic *"it works on my machine"* problem permanently.
 
 ---
 
-## 5. My Key Takeaways
+## 6. Docker Architecture — How It Works Internally
+
+Most people use Docker without understanding what's actually happening under the hood. Here's the internal architecture explained in my own words.
+
+### The 3 Main Components
+
+| Component | What it is | Analogy |
+|---|---|---|
+| **Docker Client** | The CLI you type commands into | Like a remote control |
+| **Docker Daemon (dockerd)** | The background service that does all the real work | Like the engine inside the TV |
+| **Registry** | Remote storage for Docker images | Like GitHub but for images |
+
+### How Each Command Works Internally
+
+#### `docker build`
+1. You run `docker build` on the **Docker Client**
+2. The client sends the request to the **Docker Daemon** (dockerd)
+3. The daemon reads the **Dockerfile** (which references your source code)
+4. It builds the image and stores it **locally** in the Docker Host's image store
+
+#### `docker push`
+1. You run `docker push` on the **Docker Client**
+2. Client talks to the **Docker Daemon**
+3. Daemon takes the locally built image and **uploads it to the Registry** (Docker Hub / JFrog / Nexus / Quay.io)
+
+#### `docker pull`
+1. You run `docker pull` on the **Docker Client**
+2. Client instructs the **Docker Daemon**
+3. Daemon **downloads the image from the Registry** into the local Docker Host
+
+#### `docker run`
+1. You run `docker run` on the **Docker Client**
+2. Client sends the instruction to the **Docker Daemon**
+3. Daemon instructs the **Container Runtime** (like containerd)
+4. Container Runtime **spins up the container** from the image
+
+### The Full Architecture Flow
+
+```
+Source Code + Dockerfile
+         ↓
+    Docker Client          ←── You type commands here
+    (docker build/push/pull/run)
+         ↓  [talks to]
+    Docker Daemon (dockerd)    ←── Runs on Docker Host, does the heavy lifting
+         ↓
+    ┌────────────────────────────────┐
+    │         Docker Host            │
+    │  ┌──────────┐  ┌───────────┐  │
+    │  │Containers│  │  Images   │  │
+    │  └──────────┘  └───────────┘  │
+    │       ↑              ↑        │
+    │   Container Runtime           │
+    └────────────────────────────────┘
+         ↕  [push / pull]
+      Registry
+   (Docker Hub / JFrog / Nexus / Quay.io)
+```
+
+### My Insight 💡
+> The key thing I understood here is that **you never talk to Docker directly** — you always talk to the **Docker Client**, which talks to the **Docker Daemon** on your behalf. The daemon is the real brain — it manages images, containers, networks, and volumes. The client is just the interface.
+>
+> Also, `docker run` doesn't just "start" a container — it goes through **Client → Daemon → Container Runtime** before a container actually comes alive. Understanding this chain helps a lot when debugging why a container fails to start.
+
+---
+
+## 7. My Key Takeaways
 
 1. **Docker didn't invent containers** — Linux had namespaces and cgroups for years. Docker made containers *easy to use*.
 
@@ -176,3 +271,5 @@ Dockerfile → (docker build) → Image → (docker run) → Container
 ---
 
 *These are my personal notes based on my learning and hands-on experience.*
+
+---
