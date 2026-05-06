@@ -1,15 +1,46 @@
+Multi stage docker build
+# ──────────────────────────────────────────
+# STAGE 1: installer
+# ──────────────────────────────────────────
+
+# Using Node.js 18 on Alpine Linux as our base image.
+# Alpine is a minimal Linux distro — keeps things lightweight.
+# We label this stage "installer" so we can reference it later.
 FROM node:18-alpine AS installer
 
+# Set the working directory inside the container.
+# Every command after this runs inside /app.
 WORKDIR /app
 
+# Copy only the package files first.
+# This is intentional — Docker caches layers, so if our source code
+# changes but package.json doesn't, it won't re-run npm install.
+# Saves a lot of time on repeated builds.
 COPY package*.json ./
 
+# Install all dependencies needed to build the project.
 RUN npm install
 
+# Now copy the rest of the source code into the container.
 COPY . .
 
+# Build the app — this compiles everything and outputs
+# the production-ready files into a /build folder.
 RUN npm run build
 
+# ──────────────────────────────────────────
+# STAGE 2: deployer
+# ──────────────────────────────────────────
+
+# For serving the app, we don't need Node.js at all.
+# Nginx is a lightweight, battle-tested web server — perfect for
+# serving static files (HTML, CSS, JS) that our build produced.
 FROM nginx:latest AS deployer
 
+# Here's the key part of multi-stage builds:
+# We copy ONLY the /build folder from the installer stage.
+# All the node_modules, source files, npm tooling — left behind.
+# The final image has no idea they ever existed.
 COPY --from=installer /app/build /usr/share/nginx/html
+
+
