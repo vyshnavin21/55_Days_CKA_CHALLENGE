@@ -1,0 +1,36 @@
+#declarative way to create a pod .in yaml file we have dictionaries and lists which starts with hyphen
+ #indentantion and spaces are important while writing yaml files
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+  labels:
+    app.kubernetes.io/name: myapp
+spec:
+  containers:
+  - name: myapp
+    image: nginx
+    ports:
+      - containerPort: 80
+
+#kubectl create -f pod1.yaml
+#kubectl apply -f pod1.yaml
+#kubectl get pods
+#kubectl describe pods -- it will provide the details of the pod and we can use to check when we have some 
+#error
+# if it show imagepullbackoff means may be we have given the wrong image name like that
+# to edit pod directly on cluster use this command
+#kubectl edit pod podname
+#to interact with the pod using command 
+#kubectl exec -it myapp(name of the pod ) -- sh 
+#before apllying the changes if we want to see the ouput then we can use dry run command
+# kubectl run nginx(pod name) --image=nginx --dry-run=client -o yaml
+# using -o yaml it will show the output in yaml format
+# labels are very helpful to group a resources together
+#lets say we have 100 of pods we want to know which pods are poart of front end then labels comes into handy
+# use this command to see the labels of a particular pod 
+#kubectl get pods myapp(name of the pod)--show-labels
+# kubectl get pods/nodes -o wide = to see on which node your pod is runnning then use this 
+#kubectl get pods myapp -o wide
+#NAME    READY   STATUS    RESTARTS   AGE   IP           NODE                   NOMINATED NODE   READINESS GATES
+#myapp   1/1     Running   0          23m   10.244.1.2   cka-cluster2-worker2   <none>           <none>
