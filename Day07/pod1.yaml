@@ -1,0 +1,117 @@
+# Kubernetes Pods — Declarative Approach
+
+In Kubernetes, there are two ways to create resources — **imperative** (using kubectl commands directly) and **declarative** (using YAML files). This covers the declarative way.
+
+---
+
+## YAML Basics
+
+Before writing pod manifests, a couple of things to keep in mind about YAML:
+
+- YAML files contain **dictionaries** (key-value pairs) and **lists** (items starting with a `-` hyphen)
+- **Indentation and spaces matter** — wrong indentation will break the file, tabs are not allowed
+
+---
+
+## Writing a Pod Manifest
+
+```yaml
+# pod1.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+  labels:
+    app.kubernetes.io/name: myapp
+spec:
+  containers:
+  - name: myapp
+    image: nginx
+    ports:
+      - containerPort: 80
+```
+
+---
+
+## Applying the Manifest
+
+```bash
+# Both of these create the pod from the yaml file
+# create throws an error if the resource already exists
+# apply is idempotent — safe to run multiple times
+kubectl create -f pod1.yaml
+kubectl apply -f pod1.yaml
+```
+
+---
+
+## Useful Commands
+
+### Check pod status
+
+```bash
+kubectl get pods
+```
+
+### Describe a pod — great for debugging
+
+```bash
+kubectl describe pods
+```
+
+> If you see `ImagePullBackOff` in the events, it usually means the image name is wrong or doesn't exist in the registry. `kubectl describe` is the first place to look when something goes wrong.
+
+### Edit a pod directly on the cluster
+
+```bash
+kubectl edit pod myapp
+```
+
+### Get a shell inside a running pod
+
+```bash
+kubectl exec -it myapp -- sh
+```
+
+---
+
+## Dry Run — Preview Before Applying
+
+Before actually creating anything, you can use `--dry-run=client` to see what would be created without actually doing it. Adding `-o yaml` to see the outputs it in YAML format — handy for generating a base manifest quickly.
+
+```bash
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+```
+
+---
+
+## Labels
+
+Labels are key-value pairs attached to resources. They are really useful for **grouping and filtering** resources.
+
+For example, if you have 100 pods and want to know which ones belong to the frontend — labels make that easy.
+
+### View labels of a pod
+
+```bash
+kubectl get pods myapp --show-labels
+```
+
+---
+
+## Checking Which Node a Pod is Running On
+
+```bash
+kubectl get pods myapp -o wide
+# or for nodes
+kubectl get nodes -o wide
+```
+
+**Example output:**
+
+```
+NAME    READY   STATUS    RESTARTS   AGE   IP           NODE                   NOMINATED NODE   READINESS GATES
+myapp   1/1     Running   0          23m   10.244.1.2   cka-cluster2-worker2   <none>           <none>
+```
+
+The `-o wide` flag adds extra columns like the pod IP and the node it landed on.
