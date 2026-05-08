@@ -1,5 +1,14 @@
 
 # ReplicationController, ReplicaSet & Deployment
+---
+In Kubernetes, if a user is accessing an application and the pod crashes, the user loses access. To avoid that, we use controllers.
+ReplicationController is the older way — you tell it how many pods you need, it makes sure that many are always running. Pod crashes, it brings a new one. Extra pods, it removes them. But it's legacy now, we don't use it anymore.
+ReplicaSet is the newer version of ReplicationController. It does the same job — maintains the desired number of pods. The difference is ReplicaSet can also manage existing pods using matchLabels in the selector. But we don't create ReplicaSet directly either.
+Deployment is what we actually use. Deployment tells the ReplicaSet how many pods to maintain, and ReplicaSet creates them. On top of that, Deployment gives us rolling updates — when we upgrade our application, it replaces old pods with new ones one by one, so users never see downtime. If the new version has issues, we just run kubectl rollout undo and it goes back to the previous version."
+
+The one key concept to always mention:
+Deployment works on desired state vs actual state. You define what you want — say 3 pods. Kubernetes always watches and makes sure the actual state matches. Pod dies? It brings a new one. That's the reconciliation loop.
+
 
 ReplicaSet maintains a stable number of pods. If one crashes, it spins up a new one. If there are extra ones, it removes them.But when we want to upgrade our application, ReplicaSet can't handle that smoothly — it would cause downtime. So we use Deployment, which sits on top of ReplicaSet and handles rolling updates — It gradually replaces old pods with new ones, so there's no downtime. If the new version has issues, we can go back to the previous version using kubectl rollout undo.
 ---
