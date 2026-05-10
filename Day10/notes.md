@@ -14,7 +14,7 @@ Resources can access each other in the same namespace with their first name by t
 ---
 kubectl get ns # provides all namespaces in the system
 ---
-kubectl get all --namespace=kube-system or kubectl get -n kube-system
+kubectl get all --namespace=kube-system or kubectl get all -n kube-system
 which provides what and all components are there in kube system namespace,etcd,apiserver,coredns all control plane components 
 you can see under kube-system namespace
 ---
